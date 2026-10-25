@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Link, RouterProvider, createHashRouter } from 'react-router-dom';
 import RootLayout from './RootLayout';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
@@ -12,7 +12,7 @@ import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/AdminDashboard';
 import { CartProvider } from './store/CartContext';
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: "/",
     element: <RootLayout />,
@@ -28,7 +28,7 @@ const router = createBrowserRouter([
           <div className="min-h-screen pt-32 pb-20 flex flex-col items-center justify-center">
             <h1 className="text-4xl font-serif font-bold mb-4">404</h1>
             <p className="text-neutral-500 mb-8">Page not found</p>
-            <a href="/" className="border border-neutral-900 px-8 py-3 text-sm font-medium hover:bg-neutral-900 hover:text-white transition-colors">Return Home</a>
+            <Link to="/" className="border border-neutral-900 px-8 py-3 text-sm font-medium hover:bg-neutral-900 hover:text-white transition-colors">Return Home</Link>
           </div>
         )
       }
