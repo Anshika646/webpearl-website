@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -46,6 +47,61 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
+
+      - name: Wait for legacy branch Pages build if active
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node - <<'EOF'
+          const repo = process.env.GITHUB_REPOSITORY;
+          const sha = process.env.GITHUB_SHA;
+          const token = process.env.GITHUB_TOKEN;
+          const headers = {
+            Accept: 'application/vnd.github+json',
+            'User-Agent': 'webpearl-pages-deploy',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          };
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          (async () => {
+            await sleep(5000);
+            for (let attempt = 1; attempt <= 45; attempt++) {
+              try {
+                const res = await fetch(
+                  `https://api.github.com/repos/${repo}/actions/runs?head_sha=${sha}&per_page=20`,
+                  { headers }
+                );
+                if (!res.ok) {
+                  console.log(`GitHub API responded with ${res.status}; proceeding.`);
+                  break;
+                }
+                const data = await res.json();
+                const legacyRuns = (data.workflow_runs || []).filter(
+                  (run) =>
+                    run.name === 'pages build and deployment' ||
+                    (run.path && run.path.startsWith('dynamic/pages/'))
+                );
+                if (legacyRuns.length === 0) {
+                  console.log('Pages source is GitHub Actions (no legacy branch build). Proceeding.');
+                  break;
+                }
+                const running = legacyRuns.filter((run) => run.status !== 'completed');
+                if (running.length === 0) {
+                  console.log('Legacy branch Pages build finished; waiting 6s buffer before deploying dist...');
+                  await sleep(6000);
+                  break;
+                }
+                console.log(
+                  `Attempt ${attempt}/45: Waiting for legacy "pages build and deployment" to complete so it does not overwrite dist...`
+                );
+              } catch (err) {
+                console.log('Check error, proceeding:', err);
+                break;
+              }
+              await sleep(4000);
+            }
+          })();
+          EOF
 
   deploy:
     environment:

@@ -77,8 +77,13 @@ export default function Checkout() {
       createdAt: new Date().toISOString()
     };
     
-    const existingOrders = JSON.parse(localStorage.getItem('webpearll_orders') || '[]');
-    localStorage.setItem('webpearll_orders', JSON.stringify([newOrder, ...existingOrders]));
+    try {
+      const existingOrders = JSON.parse(localStorage.getItem('webpearll_orders') || '[]');
+      const safeOrders = Array.isArray(existingOrders) ? existingOrders : [];
+      localStorage.setItem('webpearll_orders', JSON.stringify([newOrder, ...safeOrders]));
+    } catch {
+      // Ignore storage quota / privacy mode errors
+    }
 
     setStep('success');
     clearCart();

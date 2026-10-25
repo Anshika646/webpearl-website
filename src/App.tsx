@@ -12,10 +12,28 @@ import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/AdminDashboard';
 import { CartProvider } from './store/CartContext';
 
+function RouteErrorFallback() {
+  return (
+    <div className="min-h-screen bg-luxury-cream text-luxury-charcoal px-6 flex flex-col items-center justify-center text-center">
+      <h1 className="text-4xl font-serif italic mb-4">Something went wrong</h1>
+      <p className="text-luxury-text/70 mb-8 max-w-md text-sm">
+        We encountered an unexpected issue loading this view. Please return to the homepage.
+      </p>
+      <Link
+        to="/"
+        className="bg-luxury-charcoal text-luxury-cream px-8 py-3 text-xs uppercase tracking-[0.2em] font-bold hover:bg-luxury-rose transition-colors"
+      >
+        Return Home
+      </Link>
+    </div>
+  );
+}
+
 const router = createHashRouter([
   {
     path: "/",
     element: <RootLayout />,
+    errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <Home /> },
       { path: "shop", element: <Shop /> },

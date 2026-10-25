@@ -5,8 +5,12 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('webpearll_orders') || '[]');
-    setOrders(stored);
+    try {
+      const stored = JSON.parse(localStorage.getItem('webpearll_orders') || '[]');
+      setOrders(Array.isArray(stored) ? stored : []);
+    } catch {
+      setOrders([]);
+    }
   }, []);
 
   const updateOrderStatus = (orderId: string, newStatus: string) => {
@@ -14,7 +18,11 @@ export default function AdminDashboard() {
       order.id === orderId ? { ...order, status: newStatus } : order
     );
     setOrders(updatedOrders);
-    localStorage.setItem('webpearll_orders', JSON.stringify(updatedOrders));
+    try {
+      localStorage.setItem('webpearll_orders', JSON.stringify(updatedOrders));
+    } catch {
+      // Ignore storage quota / privacy mode errors
+    }
   };
 
   const formatPrice = (price: number) => {
