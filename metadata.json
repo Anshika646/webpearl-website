@@ -1,0 +1,6 @@
+{
+  "name": "WebPearll",
+  "description": "Premium luxury fashion eCommerce store with advanced animations and simulated QR payment flow.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
